@@ -1,0 +1,6 @@
+{
+  "name": "HiTek India Dataset Lookup & API Gateway",
+  "description": "Number lookup console, API key access gateway, Parquet shard explorer, and GitHub Pages static exporter for the bashabashi420/hitek-india Hugging Face dataset.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -220,3 +220,26 @@ jobs:
         uses: actions/deploy-pages@v4
 `;
 }
+
+export function generateVercelConfigJson(): string {
+  return JSON.stringify(
+    {
+      version: 2,
+      buildCommand: 'npm run build',
+      outputDirectory: 'dist',
+      rewrites: [
+        {
+          source: '/api/(.*)',
+          destination: '/api/index',
+        },
+        {
+          source: '/(.*)',
+          destination: '/index.html',
+        },
+      ],
+    },
+    null,
+    2
+  );
+}
+

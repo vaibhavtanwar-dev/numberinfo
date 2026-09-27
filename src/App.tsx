@@ -3,10 +3,12 @@ import {
   Search,
   Key,
   Database,
-  Layers,
   AlertCircle,
   CheckCircle2,
   RefreshCw,
+  Copy,
+  Check,
+  ExternalLink,
 } from 'lucide-react';
 import {
   SubscriberRecord,
@@ -43,10 +45,17 @@ export default function App() {
   const [indexedRowsCount, setIndexedRowsCount] = useState(0);
 
   // Lookup State
-  const [searchInput, setSearchInput] = useState('9999999891');
+  const [searchInput, setSearchInput] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('number') || params.get('q') || '9999999891';
+    }
+    return '9999999891';
+  });
   const [lookupResult, setLookupResult] = useState<LookupResponse | null>(null);
   const [lookupLoading, setLookupLoading] = useState(false);
   const [lookupError, setLookupError] = useState<string | null>(null);
+  const [copiedEndpointUrl, setCopiedEndpointUrl] = useState(false);
 
   // Dataset Browser State
   const [browserRows, setBrowserRows] = useState<SubscriberRecord[]>([]);
@@ -82,9 +91,15 @@ export default function App() {
       setNumRowsTotal(batch.numRowsTotal);
       setIndexedRowsCount(batch.indexedRowsInMemory);
 
-      // Run initial lookup for the default sample number so user sees real data immediately
+      // Run initial lookup for the default or URL-provided number so user sees real data immediately
+      const initialQuery =
+        typeof window !== 'undefined'
+          ? new URLSearchParams(window.location.search).get('number') ||
+            new URLSearchParams(window.location.search).get('q') ||
+            '9999999891'
+          : '9999999891';
       const initialLookup = await lookupSubscriberByQuery({
-        query: '9999999891',
+        query: initialQuery,
         apiKey: activeKeyToUse,
         dataset: datasetId,
       });
@@ -279,7 +294,7 @@ export default function App() {
                 : 'hover:text-white'
             }`}
           >
-            GitHub Host
+            Vercel & GitHub
           </button>
         </nav>
 
@@ -483,6 +498,57 @@ export default function App() {
                   <RefreshCw className={`w-3.5 h-3.5 ${lookupLoading ? 'animate-spin' : ''}`} />
                   <span>Force Live HF /filter Query</span>
                 </button>
+              </div>
+
+              {/* Direct Live GET Endpoint Bar: /api/v1/lookup?number=... */}
+              <div className="pt-3 border-t border-slate-800/70 flex flex-wrap items-center justify-between gap-3 bg-slate-950/70 px-3.5 py-2.5 rounded-lg border border-slate-800/80">
+                <div className="flex items-center gap-2 text-xs font-mono min-w-0 flex-1">
+                  <span className="text-emerald-400 font-semibold shrink-0">GET</span>
+                  <span className="text-amber-300 truncate">
+                    {`${
+                      typeof window !== 'undefined' ? window.location.origin : ''
+                    }/api/v1/lookup?number=${encodeURIComponent(
+                      searchInput.trim() || '9999999891'
+                    )}`}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const fullUrl = `${window.location.origin}/api/v1/lookup?number=${encodeURIComponent(
+                        searchInput.trim() || '9999999891'
+                      )}`;
+                      navigator.clipboard.writeText(fullUrl);
+                      setCopiedEndpointUrl(true);
+                      setTimeout(() => setCopiedEndpointUrl(false), 1600);
+                    }}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium rounded-md transition-colors cursor-pointer"
+                  >
+                    {copiedEndpointUrl ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>Copied URL</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5" />
+                        <span>Copy API URL</span>
+                      </>
+                    )}
+                  </button>
+                  <a
+                    href={`/api/v1/lookup?number=${encodeURIComponent(
+                      searchInput.trim() || '9999999891'
+                    )}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-xs font-medium rounded-md transition-colors"
+                  >
+                    <span>Open JSON</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
               </div>
             </div>
 

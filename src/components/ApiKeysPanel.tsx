@@ -69,9 +69,9 @@ export const ApiKeysPanel: React.FC<ApiKeysPanelProps> = ({
   const curlCommands = [
     {
       id: 'curl_lookup',
-      title: '01. API Key Number Info Lookup Endpoint',
-      subtitle: 'Query mobile number details using your generated API key',
-      cmd: `curl -X GET \\\n     "${originUrl}/api/v1/lookup?number=9999999891&api_key=${selectedApiKey}"`,
+      title: '01. Direct Number Info Lookup Endpoint',
+      subtitle: 'Query mobile number details directly via GET /api/v1/lookup?number=...',
+      cmd: `curl -X GET \\\n     "${originUrl}/api/v1/lookup?number=9999999891"`,
     },
     {
       id: 'curl_rows',
